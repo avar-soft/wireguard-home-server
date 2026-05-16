@@ -173,7 +173,7 @@ DNS-сервер — **dnsmasq** с раздельной обработкой з
 ### Установка за 1 команду
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/varenko/wireguard-home-server/main/wg-server.sh -o wg-server.sh \
+curl -fsSL https://raw.githubusercontent.com/avar-soft/wireguard-home-server/main/wg-server.sh -o wg-server.sh \
   && chmod +x wg-server.sh \
   && sudo bash wg-server.sh
 ```
@@ -479,7 +479,7 @@ Pull requests приветствуются. Для значительных из
 
 ## 📄 Лицензия
 
-MIT © [varenko](https://github.com/varenko)
+MIT © [avar-soft](https://github.com/avar-soft)
 
 ---
 
