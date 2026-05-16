@@ -2,7 +2,7 @@
   
 # 🛡️ WireGuard Home Server
 
-**Профессиональный WireGuard-сервер с умной geo-маршрутизацией и Fake TLS**
+**Профессиональный WireGuard-сервер с умной geo-маршрутизацией**
 
 [![Version](https://img.shields.io/badge/версия-28.24.21-blue?style=for-the-badge&logo=github)](https://github.com/varenko/wg-server)
 [![Bash](https://img.shields.io/badge/Bash-4.3+-green?style=for-the-badge&logo=gnu-bash)](https://www.gnu.org/software/bash/)
