@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/версия-28.24.21-blue?style=for-the-badge&logo=github)](https://github.com/varenko/wg-server)
 [![Bash](https://img.shields.io/badge/Bash-4.3+-green?style=for-the-badge&logo=gnu-bash)](https://www.gnu.org/software/bash/)
 [![License](https://img.shields.io/badge/лицензия-MIT-orange?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/платформа-Ubuntu%20%7C%20Debian-purple?style=for-the-badge&logo=linux)](https://ubuntu.com)
+[![Platform](https://img.shields.io/badge/платформа-Ubuntu-purple?style=for-the-badge&logo=linux)](https://ubuntu.com)
 
 *Один скрипт - полный VPN-сервер. Один трафик идет напрямую, другой через туннель.*  
 *GeoIP · Split-DNS · Anti-DPI · Balancer.*
