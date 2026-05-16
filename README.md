@@ -2,7 +2,7 @@
 
 <a name="readme-top"></a>
 
-**[🇷🇺 Русский](#русский) · [🇬🇧 English](#english)**
+**[🇷🇺 Русский](#русский) · [en English](#english)**
 
 ---
 
