@@ -1,6 +1,6 @@
 <div align="center">
   
-# 🛡️ WireGuard Home Server
+# 🛡️ WireGuard Home Server PRO
 
 **Профессиональный WireGuard-сервер с умной geo-маршрутизацией**
 
