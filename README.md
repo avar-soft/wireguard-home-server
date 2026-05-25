@@ -1,3 +1,5 @@
+<div align="center">
+
 # 🛡️ WireGuard Home Server
 
 **Профессиональный WireGuard-сервер с умной geo-маршрутизацией**
@@ -9,6 +11,8 @@
 
 *Один скрипт — полный VPN-сервер. Один трафик идёт напрямую, другой через туннель.*  
 *GeoIP · Split-DNS · Unbound · DNS-over-TLS · Anti-DPI · Balancer · Telemt MTProxy*
+
+</div>
 
 ---
 
@@ -523,6 +527,11 @@ MIT © [avar-soft](https://github.com/avar-soft)
 
 ---
 
+<div align="center">
+
 **Сделано с ❤️ для тех, кто ценит приватность и скорость**
 
 ⭐ Если проект полезен — поставь звезду!
+
+</div>
+
