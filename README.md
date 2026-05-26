@@ -379,29 +379,66 @@ sudo bash wg-server-unbound.sh   # или нужный вариант
 
 ```
 /etc/wireguard/
-├── wg0.conf                    # Основной WireGuard интерфейс
-├── wg1.conf, wg2.conf...       # Туннели
-├── .wg-setup.conf              # Конфигурация скрипта
-├── .traffic-limits             # Лимиты трафика по клиентам
+├── wg0.conf                        # Основной WireGuard интерфейс (сервер)
+├── wg1.conf, wg2.conf...           # Туннели до внешних VPS
+├── .wg-setup.conf                  # Конфигурация скрипта (IP, порт, интерфейс...)
+├── .direct-domains                 # Домены, идущие напрямую (минуя VPN)
+├── .tunnel-force-domains           # Домены, всегда идущие через туннель
+├── .tunnel-force-cidr              # IP/CIDR, принудительно через туннель
+├── .antidpi.conf                   # Настройки Anti-DPI
 ├── clients/
-│   ├── phone.conf
+│   ├── phone.conf                  # Конфиг клиента (скачать/импортировать)
+│   ├── phone.png                   # QR-код клиента
 │   └── laptop.conf
 └── geoip/
-    ├── ru-aggregated.zone      # Offline IPv4 база
-    └── ru-aggregated-v6.zone   # Offline IPv6 база
+    ├── ru-aggregated.zone          # Offline IPv4 база РФ (8500+ подсетей)
+    └── ru-aggregated-v6.zone       # Offline IPv6 база РФ
+
+/etc/dnsmasq.d/
+├── wg-dns.conf                     # Основные DNS-правила (апстримы, зоны)
+├── wg-tunnel-force.conf            # Домены, резолвящиеся через туннель
+└── wg-direct-domains.conf          # Домены, резолвящиеся напрямую (РФ-зоны)
+
+/etc/unbound/                       # Только в версиях -unbound
+├── unbound.conf.d/
+│   └── wg-recursive.conf           # Рекурсивный резолвер, DNSSEC, qname-min
+
+/var/lib/unbound/                   # Только в версиях -unbound
+├── root.hints                      # База корневых DNS-серверов (обновляется cron)
+└── root.key                        # DNSSEC trust anchor
+
+/etc/stubby/
+└── stubby.yml                      # Конфиг DNS-over-TLS резолвера
+
+/etc/sysctl.d/
+└── 99-wireguard-forwarding.conf    # IP-forwarding, rp_filter, IPv6
+
+/etc/systemd/resolved.conf.d/
+└── 99-wireguard.conf               # Отключение stub-resolver (DNSStubListener=no)
+
+/etc/telemt.toml                    # Конфиг Telemt MTProxy (Rust)
+/etc/mtg.env                        # Секрет и хост старого MTProto (mtg)
 
 /usr/local/bin/
-├── wg-balance.sh               # Балансировщик туннелей
-├── update-ru-ipset.sh          # Обновление GeoIP
-├── wg-traffic-limit.sh         # Watchdog лимитов трафика
-└── telemt                      # Бинарь MTProxy
+├── wg-balance.sh                   # Балансировщик туннелей (пинг, переключение)
+├── wg-balance-watchdog.sh          # Watchdog: восстанавливает маршрутизацию
+├── update-ru-ipset.sh              # Обновление GeoIP-базы в nftables
+├── wg-traffic-limit.sh             # Watchdog лимитов трафика клиентов
+└── telemt                          # Бинарь Telemt MTProxy
 
-/etc/unbound/unbound.conf       # Конфиг рекурсивного резолвера (в -unbound версиях)
-/etc/telemt.toml                # Конфиг Telemt MTProxy
-/etc/stubby/stubby.yml          # Конфиг DNS-over-TLS резолвера
-/var/lib/wg/limits/             # State-файлы счётчиков трафика
-/var/backups/wg-home/           # Бэкапы конфигурации
-/var/log/wg-server-trap.log     # Лог ошибок скрипта
+/var/lib/wg/
+├── limits/
+│   ├── <client>.total              # Суммарный трафик клиента (байты)
+│   ├── <client>.rx                 # Входящий трафик
+│   ├── <client>.tx                 # Исходящий трафик
+│   └── <client>.disabled           # Флаг: клиент отключён за превышение лимита
+└── last-pub-ip                     # Последний известный публичный IP сервера
+
+/var/lib/telemt/tlsfront/           # TLS-сертификаты Telemt (Fake TLS)
+/var/cache/wg-geoip.etag            # ETag для инкрементального обновления GeoIP
+/var/backups/wg-home/               # Бэкапы (последние 10 архивов .tar.gz)
+/var/log/wg-server-trap.log         # Лог ERR-trap (ошибки скрипта)
+/var/log/wg-balance-watchdog.log    # Лог watchdog балансировщика
 ```
 
 ---
