@@ -4,28 +4,41 @@
 
 **Профессиональный WireGuard-сервер с умной geo-маршрутизацией**
 
-[![Version](https://img.shields.io/badge/версия-28.25.1-blue?style=for-the-badge&logo=github)](https://github.com/avar-soft/wireguard-home-server)
-[![Bash](https://img.shields.io/badge/Bash-4.3+-green?style=for-the-badge&logo=gnu-bash)](https://www.gnu.org/software/bash/)
-[![License](https://img.shields.io/badge/лицензия-MIT-orange?style=for-the-badge)](https://github.com/avar-soft/wireguard-home-server/blob/main/LICENSE)
-[![Platform](https://img.shields.io/badge/платформа-Ubuntu-purple?style=for-the-badge&logo=linux)](https://ubuntu.com)
+[![Version](https://img.shields.io/badge/Версия-28.24.22-blue?style=for-the-badge&logo=github)](https://github.com/avar-soft/wireguard-home-server) [![Bash](https://img.shields.io/badge/Bash-4.3+-green?style=for-the-badge&logo=gnu-bash)](https://www.gnu.org/software/bash/) [![License](https://img.shields.io/badge/Лицензия-MIT-orange?style=for-the-badge)](https://github.com/avar-soft/wireguard-home-server/blob/main/LICENSE) [![Platform](https://img.shields.io/badge/Платформа-Ubuntu-purple?style=for-the-badge&logo=linux)](https://ubuntu.com)
 
-*Один скрипт — полный VPN-сервер. Один трафик идёт напрямую, другой через туннель.*  
-*GeoIP · Split-DNS · Unbound · DNS-over-TLS · Anti-DPI · Balancer · Telemt MTProxy*
+*Один скрипт — полный VPN-сервер. Локальный трафик идёт напрямую, зарубежный — через туннель.*  
+*GeoIP · Split-DNS · Anti-DPI · Balancer.*
 
 </div>
 
 ---
 
-## 📦 Два варианта скрипта
+## 📦 Три варианта скрипта — выбери нужный
 
-В репозитории два файла — выбери нужный:
+В репозитории три версии под разные потребности:
 
-| Файл | Описание | Когда выбирать |
-|------|----------|----------------|
-| [`wg-server.sh`](https://github.com/avar-soft/wireguard-home-server/blob/main/wg-server.sh) | **Классический** — DNS через Яндекс (geo) или Google (tunnel/public) | Простая настройка, минимум зависимостей |
-| [`wg-server-unbound.sh`](https://github.com/avar-soft/wireguard-home-server/blob/main/wg-server-unbound.sh) | **Расширенный** — geo-режим через локальный **unbound** (рекурсивный, DNSSEC, без внешнего апстрима) + все исправления v28.25 | Максимальная приватность DNS, планируются большие списки CIDR |
+| Функция | `wg-server.sh` | `wg-server-unbound.sh` | `wg-server-unbound-testmenu.sh` |
+|---|:---:|:---:|:---:|
+| WireGuard-сервер | ✅ | ✅ | ✅ |
+| GeoIP (8500+ подсетей, batch) | ✅ | ✅ | ✅ |
+| Балансировщик туннелей (до 5) | ✅ | ✅ | ✅ |
+| Anti-DPI (BBR, MSS clamping, jitter) | ✅ | ✅ | ✅ |
+| Killswitch | ✅ | ✅ | ✅ |
+| Лимиты трафика по клиентам | ✅ | ✅ | ✅ |
+| Бэкап / восстановление | ✅ | ✅ | ✅ |
+| Telemt + MTProto Proxy | ✅ | ✅ | ✅ |
+| DNS via dnsmasq + Яндекс.DNS / 8.8.8.8 | ✅ | ✅ | ✅ |
+| DNS-over-TLS (stubby, Cloudflare/Quad9) | ✅ | ✅ | ✅ |
+| **Unbound** (рекурсивный резолвер, DNSSEC) | ❌ | ✅ | ✅ |
+| **Тест системы — базовый** (15 проверок) | ✅ | ✅ | ✅ |
+| **Тест системы — расширенный** (18 секций, по одной) | ❌ | ❌ | ✅ |
+| **Меню диагностики по секциям** | ❌ | ❌ | ✅ |
 
-> **Рекомендуется `wg-server-unbound.sh`** — включает все последние исправления надёжности и безопасности, а geo-режим DNS работает полностью автономно через unbound + root servers, без зависимости от Яндекс/Google.
+### Какой выбрать?
+
+- **`wg-server.sh`** — базовый вариант. DNS через dnsmasq + Яндекс/Google/stubby. Оптимален если важна простота и минимум зависимостей.
+- **`wg-server-unbound.sh`** — рекомендуется для большинства. Добавляет Unbound — локальный рекурсивный резолвер с DNSSEC и полной изоляцией DNS-запросов. Внешние DNS-серверы не видят запросы клиентов вообще.
+- **`wg-server-unbound-testmenu.sh`** — для тех, кто хочет максимальный контроль и диагностику. Всё то же, что в `-unbound`, плюс расширенное меню тестирования с разбивкой по 18 секциям: WireGuard, туннели, маршрутизация, nftables/GeoIP, dnsmasq, unbound, stubby, DNS chain, балансировщик, Anti-DPI, killswitch, Telemt, MTProto, интернет, IPv6, автозапуск, безопасность, бэкапы.
 
 ---
 
@@ -34,10 +47,10 @@
 Обычный VPN отправляет **весь** трафик через сервер — это медленно и дорого. Этот скрипт умнее:
 
 - 🇷🇺 **Локальные сайты** — идут **напрямую**, без туннеля, на полной скорости
-- 🌍 **Зарубежные ресурсы** — автоматически **через туннель**, без лишних задержек
+- 🌍 **Другие ресурсы** — автоматически **через туннель**, без лишних задержек
 - ⚖️ **Несколько туннелей** — балансировщик выбирает самый быстрый автоматически
 
-База РФ IP-адресов содержит **8500+ подсетей** (IPv4 и IPv6) и обновляется автоматически из [автономного репозитория](https://github.com/avar-soft/wireguard-home-server/tree/main/geoip) — без зависимости от ipdeny.com.
+База РФ IP-адресов содержит **8500+ подсетей** (IPv4 и IPv6) и обновляется автоматически.
 
 ---
 
@@ -46,23 +59,22 @@
 ### 🗺️ Умная маршрутизация
 
 | Режим | Описание |
-|-------|----------|
+|---|---|
 | **🌍 Geo-split** *(по умолчанию)* | РФ напрямую, всё остальное через туннель |
 | **🔒 Full-VPN** | Весь трафик через туннель (классический VPN) |
 | **🏠 Direct-only** | Весь трафик напрямую (VPN временно выключен) |
 
-Профили переключаются **мгновенно** из меню без перезапуска сервисов. Каждому клиенту можно назначить свой профиль независимо.
+Профили переключаются **мгновенно** из меню без перезапуска сервисов.
 
 ---
 
 ### 🔥 GeoIP — интеллектуальная база IP
 
-- 📦 **Batch-загрузка** — 8500+ подсетей загружаются пачками, не перегружая сервер
+- 📦 **Batch-загрузка** — 8500+ подсетей загружаются пачками по 1000, не перегружая сервер
 - 🗂️ **Offline-режим** — положи `ru-aggregated.zone` рядом, интернет не нужен
-- 🔄 **Авто-обновление** — systemd-timer обновляет базу каждые 12 часов
+- 🔄 **Авто-обновление** — cron-задача обновляет базу по расписанию
 - 🌐 **IPv4 + IPv6** — полная поддержка обоих стеков (`@russia` + `@russia_v6` в nftables)
-- ⚡ **nftables** — современный файрвол, атомарные обновления через `mktemp` + `nft -c` + `mv -f`
-- 📡 **Первичный источник** — [geoip/](https://github.com/avar-soft/wireguard-home-server/tree/main/geoip) этого репозитория; ipdeny.com и другие — резервные
+- ⚡ **nftables** — современный файрвол вместо устаревшего iptables, атомарные обновления
 
 ---
 
@@ -70,9 +82,9 @@
 
 - 📡 **До 5 туннелей** одновременно — подключи VPS в разных странах
 - 🏓 **Пинг-мониторинг** — каждые N секунд измеряет задержку до каждого туннеля
-- 🔀 **Автопереключение** — если активный туннель деградировал, трафик уходит на лучший
+- 🔀 **Автопереключение** — если активный туннель деградировал (`> 200ms` по умолчанию), трафик уходит на лучший
+- 🔁 **Полный цикл** — раз в 5 минут сравниваются все туннели, выбирается абсолютно лучший
 - 📊 **Watchdog** — systemd-сервис, восстанавливает правила маршрутизации после перезагрузки
-- 🔁 **flock-защита** — балансировщик и repairRouting не конкурируют за `ip rule`
 
 ---
 
@@ -81,49 +93,43 @@
 Три режима DNS, переключаемые из меню:
 
 ```
-geo     → unbound (рекурсия, DNSSEC, root servers) — в wg-server-unbound.sh
-           или Яндекс DNS (77.88.8.8) в классическом варианте
-tunnel  → Весь DNS через туннель + DoT-шифрование через stubby (Cloudflare/Quad9 по TLS)
-public  → 8.8.8.8 / 8.8.4.4 напрямую
+geo     → dnsmasq → Яндекс DNS (77.88.8.8) для РФ-зон, unbound/8.8.8.8 для остального
+tunnel  → Весь DNS через туннель + DoT-шифрование через stubby
+public  → 8.8.8.8 / 8.8.4.4 напрямую (максимальная скорость)
 ```
-
-DNS-сервер — **dnsmasq** с раздельной обработкой зон.
 
 ---
 
-### 🔐 Unbound — рекурсивный резолвер (только `wg-server-unbound.sh`)
+### 🔄 Unbound — рекурсивный DNS-резолвер (`-unbound` и `-unbound-testmenu`)
 
-В geo-режиме dnsmasq форвардит запросы на локальный **unbound** (127.0.0.1:5335), который:
-
-- Рекурсивно ходит к **корневым серверам DNS** (`root.hints`) — никакого внешнего апстрима
-- Валидирует **DNSSEC** (`auto-trust-anchor`)
-- Применяет **qname-minimisation** — каждый NS получает только нужную ему часть имени
-- Кэширует до 512 MB (rrset + msg cache), aggressive-nsec + prefetch
-
-**Схема в geo-режиме:**
+В версиях с Unbound DNS-цепочка выглядит так:
 
 ```
-Клиент → dnsmasq (сервер) → unbound (127.0.0.1:5335) → корневые DNS серверы
+Клиент → dnsmasq (сервер :53) → unbound (127.0.0.1:5335) → root servers
 ```
 
-При недоступности unbound — автоматический fallback на Яндекс.DNS (77.88.8.8, входит в @russia, трафик напрямую).
+- 🔒 **Полная рекурсия** — unbound сам опрашивает корневые серверы, без внешних апстримов
+- ✅ **DNSSEC** — проверка подписей, поддельные ответы отвергаются
+- 🕵️ **Изоляция запросов** (qname minimisation) — каждый сервер видит только свой уровень имени
+- 📁 **root.hints** — файл корневых серверов обновляется автоматически
+- 🚪 **DoT-режим** — в `tunnel`-режиме unbound заменяется на stubby с TLS-шифрованием
 
 ---
 
-### 🔐 DNS-over-TLS (tunnel-режим)
+### 🔐 DNS-over-TLS
 
-Все DNS-запросы шифруются через **stubby** — локальный DoT-резолвер (127.0.0.1:5353). Провайдер видит только зашифрованное TLS на порту 853.
+Все DNS-запросы с сервера шифруются через **stubby** — локальный DoT-резолвер (порт 5353).
 
 **Схема в tunnel-режиме:**
 
 ```
-Клиент → dnsmasq → stubby (127.0.0.1:5353) → DoT :853 → [туннель] → Cloudflare / Quad9
+Клиент → dnsmasq → stubby (127.0.0.1:5353) → DoT (порт 853) → [через туннель] → Cloudflare / Quad9
 ```
 
-**Пресеты резолверов** (переключаются из меню):
+**Пресеты резолверов:**
 
 | Пресет | Адреса | Особенность |
-|--------|--------|-------------|
+|---|---|---|
 | ☁️ **Cloudflare** | 1.1.1.1 / 1.0.0.1 | Максимальная скорость |
 | 🛡️ **Quad9** | 9.9.9.9 | Блокировка malware/фишинга |
 | 🔍 **Google** | 8.8.8.8 / 8.8.4.4 | Классика, высокая надёжность |
@@ -132,27 +138,13 @@ DNS-сервер — **dnsmasq** с раздельной обработкой з
 
 ---
 
-### 🛡️ Anti-DPI
+### 🛡 Anti-DPI
 
 Обфускация WireGuard от систем глубокой инспекции пакетов:
 
 - **MSS Clamping** — корректировка TCP MSS, устраняет проблемы с MTU
-- **TTL нормализация** — сбрасывает TTL до 64 (скрывает структуру сети)
-- **Jitter ±5ms** — рандомизация timing пакетов, ломает паттерн WG keepalive
-- **BBR + fq** — нормализация паттернов TCP трафика
-- **Настраиваемый MTU** — для каждого туннеля отдельно (1420 / 1280)
-
----
-
-### 🦀 Telemt MTProxy
-
-Современная замена MTG на Rust:
-
-- Fake TLS + TLS emulation — неотличим от HTTPS-браузера для DPI
-- Multi-user (несколько пользователей с разными ключами)
-- Anti-Replay Sliding Window
-- ~10-20 MB RAM vs ~50 MB у Go-версии
-- Нативный бинарь без Docker, CAP_NET_BIND_SERVICE для порта 443
+- **Настраиваемый MTU** — для каждого туннеля отдельно (по умолчанию 1420)
+- **Автоматическое применение** — правила nftables применяются при каждом старте
 
 ---
 
@@ -170,60 +162,70 @@ DNS-сервер — **dnsmasq** с раздельной обработкой з
 ### 📊 Лимиты трафика
 
 - 📏 **Лимит по клиенту** — задаётся в GB (суммарный входящий + исходящий)
-- ⚡ **Кумулятивный учёт** — корректно работает при перезагрузках и сбросах счётчиков
+- ⚡ **Кумулятивный учёт** — работает корректно при перезагрузках и сбросах счётчиков WireGuard
 - 🚨 **Два режима превышения**: отключить клиента или только записать в лог
 - 🔄 **Watcher** — проверяет каждые 15 минут через cron
+
+---
+
+### 🔑 Ротация ключей
+
+- Смена ключей шифрования без потери конфигурации
+- PSK (Pre-Shared Key) для дополнительного слоя безопасности
+
+---
+
+### 💾 Бэкап и восстановление
+
+Бэкап сохраняет: конфиги WireGuard, правила nftables, конфиги DNS, юниты systemd, конфиг MTProxy, вспомогательные скрипты. Хранятся последние **10 архивов**, старые удаляются автоматически.
 
 ---
 
 ## 📋 Требования
 
 | Параметр | Значение |
-|----------|----------|
-| **ОС** | Ubuntu 22.04+ / Debian 12+ |
+|---|---|
+| **ОС** | Ubuntu 24.04+ |
 | **Права** | root |
 | **Bash** | ≥ 4.3 |
-| **Архитектура** | amd64, arm64 |
-| **RAM** | ≥ 512 MB (рекомендуется 1 GB для unbound) |
+| **Архитектура** | amd64 |
+| **RAM** | ≥ 512 MB |
 | **Диск** | ≥ 1 GB свободного места |
 | **Сеть** | Публичный IP (VPS/выделенный сервер) |
 
-**Зависимости устанавливаются автоматически:**  
-`wireguard` · `nftables` · `curl` · `iproute2` · `qrencode` · `dnsmasq` · `openssl` · `xxd` · `stubby` · `unbound` · `python3`
+**Зависимости устанавливаются автоматически:** `wireguard` · `nftables` · `curl` · `iproute2` · `qrencode` · `dnsmasq` · `openssl` · `stubby` · `unbound` *(в -unbound версиях)*
 
 ---
 
 ## ⚡ Быстрый старт
 
-### Расширенная версия (рекомендуется)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/avar-soft/wireguard-home-server/main/wg-server-unbound.sh \
-  -o wg-server.sh && chmod +x wg-server.sh && sudo bash wg-server.sh
-```
-
-### Классическая версия
+### Базовая версия
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/avar-soft/wireguard-home-server/main/wg-server.sh \
   -o wg-server.sh && chmod +x wg-server.sh && sudo bash wg-server.sh
 ```
 
-При первом запуске скрипт:
+### С Unbound (рекомендуется)
 
-1. Устанавливает зависимости
-2. Задаёт несколько вопросов (интерфейс, порт, подсеть)
-3. Генерирует ключи WireGuard
-4. Настраивает nftables + GeoIP (из репозитория, ipdeny — резервный)
-5. Запускает все сервисы (включая unbound и stubby)
-6. Открывает главное меню
+```bash
+curl -fsSL https://raw.githubusercontent.com/avar-soft/wireguard-home-server/main/wg-server-unbound.sh \
+  -o wg-server-unbound.sh && chmod +x wg-server-unbound.sh && sudo bash wg-server-unbound.sh
+```
 
-**Весь процесс занимает ~2-3 минуты.**
+### С Unbound + расширенным тестированием
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/avar-soft/wireguard-home-server/main/wg-server-unbound-testmenu.sh \
+  -o wg-server-unbound-testmenu.sh && chmod +x wg-server-unbound-testmenu.sh && sudo bash wg-server-unbound-testmenu.sh
+```
+
+При первом запуске скрипт устанавливает зависимости, задаёт несколько вопросов, генерирует ключи, настраивает nftables + GeoIP, запускает все сервисы и открывает главное меню. **Весь процесс занимает ~2 минуты.**
 
 ### Последующие запуски
 
 ```bash
-sudo bash wg-server.sh
+sudo bash wg-server-unbound.sh   # или нужный вариант
 ```
 
 ---
@@ -236,11 +238,7 @@ sudo bash wg-server.sh
 Главное меню → 1) Клиенты → 1) Добавить клиента
 ```
 
-Введи имя устройства (например, `iphone` или `work-laptop`). Скрипт генерирует ключи, выдаёт IP, показывает QR-код прямо в терминале и сохраняет `.conf` в `/etc/wireguard/clients/`.
-
-QR-код сканируется приложением WireGuard (iOS / Android) — готово.
-
----
+Введи имя устройства (например, `iphone` или `work-laptop`). Скрипт генерирует ключи, выдаёт IP, показывает QR-код прямо в терминале. QR сканируется приложением WireGuard (iOS / Android) — готово.
 
 ### Добавление туннеля (внешний VPS)
 
@@ -248,28 +246,7 @@ QR-код сканируется приложением WireGuard (iOS / Android
 Главное меню → 2) Туннели → Добавить туннель
 ```
 
-Нужно ввести:
-
-- **Endpoint** — `ip:port` или `hostname:port` внешнего VPS
-- **Public Key** — публичный ключ WireGuard на внешнем сервере
-- **PSK** (опционально) — pre-shared key для усиления шифрования
-- **MTU** — обычно 1420, для некоторых провайдеров 1280
-
-Балансировщик автоматически начнёт мониторить новый туннель.
-
----
-
-### Подключение клиента
-
-**iOS / Android:** отсканируй QR-код из меню → готово.
-
-**Linux:**
-```bash
-scp root@server:/etc/wireguard/clients/mydevice.conf .
-sudo wg-quick up ./mydevice.conf
-```
-
-**Windows / macOS:** импортируй `.conf` файл в официальное приложение WireGuard.
+Нужно ввести: endpoint (`ip:port`), публичный ключ WireGuard, PSK (опционально), MTU (обычно 1420). Балансировщик автоматически начнёт мониторить новый туннель.
 
 ---
 
@@ -277,7 +254,6 @@ sudo wg-quick up ./mydevice.conf
 
 ```
 ╔═════════════════════════════════════════════════════════════╗
-║      🛡️   WireGuard Home Server  —  v28.25.1                ║
 ║   РФ напрямую │ Зарубежье в туннель │ Split-DNS │ Anti-DPI  ║
 ╚═════════════════════════════════════════════════════════════╝
 
@@ -291,7 +267,7 @@ sudo wg-quick up ./mydevice.conf
  4)  🗺️   Профили маршрутизации — geo-split / full-vpn / direct-only
  5)  📌  Прямые IP (whitelist) — свои подсети минуя VPN
  6)  🔒  Killswitch            — блокировка при обрыве VPN
- 7)  🌐  DNS (geo/tunnel/pub)  — unbound / stubby DoT / public
+ 7)  🌐  DNS (geo/tunnel/pub)  — unbound/рекурсия или DoT через туннель
  8)  🛡   Anti-DPI              — обфускация WG от блокировок РКН
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -299,7 +275,7 @@ sudo wg-quick up ./mydevice.conf
 └─────────────────────────────────────────────────────────────┘
 
  9)  📊  Статус WireGuard      — пиры, трафик, последний онлайн
-10)  ⚖️   Балансировщик        — watchdog, логи, настройки
+10)  ⚖️   Балансировщик         — watchdog, логи, настройки
 11)  📈  Мониторинг            — трафик клиентов, пинги, live-монитор
 12)  📊  Лимиты трафика        — ограничения по GB на клиента
 13)  📄  Логи                  — журналы всех сервисов
@@ -315,37 +291,74 @@ sudo wg-quick up ./mydevice.conf
 18)  💾  Бэкап / Восстановление       — сохранить и восстановить конфиги
 19)  🚀  Автозапуск                   — настройка запуска при старте сервера
 20)  🔄  Обновить скрипт              — загрузить новую версию
+21)  🔄  Перезапустить всё
+22)  💣  Удалить всё (НЕОБРАТИМО!)
+ 0)  🚪  Выход
 ```
 
 ---
 
 ## 🔬 Тест системы
 
-Меню **14) Тест системы** проверяет всю цепочку:
+### Базовый тест (все три версии)
+
+Меню **14) Тест системы** запускает 15 автоматических проверок одной командой:
 
 ```
 ── Сервисы ──
   WireGuard сервер (wg0) активен                         ✔ OK
   Балансировщик wg-balance активен                       ✔ OK
   nftables правила загружены                             ✔ OK
-  unbound (рекурсивный DNS) активен                      ✔ OK
-  Telemt MTProxy активен                                 ✔ OK
 
 ── Туннели ──
   Туннель wg1 активен                                    ✔ OK
-  Связь с сервером nl.example.com                        ✔ OK
+  Туннель wg2 активен                                    ✔ OK
 
 ── Маршрутизация ──
   fwmark правило РФ трафика                              ✔ OK
-  Балансировщик активен (таблицы)                        ✔ OK
   GeoIP база РФ (8500+ сетей) загружена                  ✔ OK
-  GeoIP IPv6 (@russia_v6) загружена                      ✔ OK
+  systemd units валидны (verify)                         ✔ OK
 
 ── Интернет ──
   Ping / связь 8.8.8.8                                   ✔ OK
   DNS резолвинг google.com                               ✔ OK
 
-✔ Все тесты пройдены (13/13)
+✔ Все тесты пройдены (15/15)
+```
+
+### Расширенный тест (`wg-server-unbound-testmenu.sh`)
+
+В версии с расширенным меню пункт **14** открывает интерактивное меню диагностики с возможностью запустить все тесты сразу или пройтись по 18 секциям отдельно:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║   ✅  ТЕСТ СИСТЕМЫ — детальная диагностика всех подсистем   ║
+╚══════════════════════════════════════════════════════════════╝
+
+┌─── ПОЛНЫЙ ТЕСТ ────────────────────────────────────────────────┐
+ 0)  🚀  Запустить ВСЕ тесты  (все 18 секций, ~45 сек)
+└────────────────────────────────────────────────────────────────┘
+
+┌─── ПО СЕКЦИЯМ ──────────────────────────────────────────────────┐
+ 1)  🔌  WireGuard-сервер       интерфейс, ключи, порт, пиры
+ 2)  🔀  Туннели                handshake, эндпоинты, трафик
+ 3)  🗺️   Маршрутизация / fwmark ip rule, таблицы, default route
+ 4)  🔥  nftables / GeoIP       таблицы, sets russia, IPv4/IPv6
+ 5)  🌐  dnsmasq                сервис, порт :53, резолвинг, изоляция
+ 6)  🔄  unbound                рекурсия, DNSSEC, root.hints, :5335
+ 7)  🔐  DNS-over-TLS (stubby)  :5353, TLS-сертификаты, Cloudflare/Quad9
+ 8)  🔗  DNS chain-тесты        сквозной резолвинг, утечки, PTR, AAAA
+ 9)  ⚖️   Балансировщик          wg-balance, watchdog, таблицы
+10)  🛡   Anti-DPI               BBR, MSS clamping, jitter
+11)  🔒  Killswitch             nft-правила, конфиги клиентов
+12)  🦀  Telemt (MTProxy)       бинарь, сервис, API, порт, SHA256
+13)  📡  MTProto (старый mtg)   сервис, secret, порт, ссылки
+14)  🌍  Интернет / связь       TCP, HTTPS, внешний IP, пинги
+15)  6️⃣   IPv6                   ядро, адреса, GeoIP, пинг6
+16)  🚀  Автозапуск / systemd   enabled, verify, таймеры
+17)  🔑  Безопасность / sysctl  forwarding, rp_filter, открытые порты
+18)  💾  Бэкапы                 директория, архивы, дата
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -353,14 +366,12 @@ sudo wg-quick up ./mydevice.conf
 ## 🔐 Безопасность
 
 - **`set -uo pipefail`** — немедленная остановка при необъявленных переменных
-- **Валидация всего пользовательского ввода** — имена, порты, пути, IP, endpoint
-- **`safe_sed()`** — экранирует все regex-метасимволы (`. * [ ] ^ $ { } + ?`) в LHS, инъекции невозможны
-- **Атомарные операции** — конфиги перезаписываются через `mktemp` + `nft -c` (dry-run) + `mv -f`
-- **ERR-trap** — все ненулевые коды логируются с контекстом (функция, строка, команда)
-- **flock-защита** — `repairRouting`, балансировщик и nftables-операции защищены от гонок
-- **Подоболочки для trap** — `trap EXIT` в `_telemt_downloadBinary` локален, не затрагивает родителя
-- **Проверка openssl** перед генерацией секретов — автоустановка при необходимости
-- **Fallback при недоступности DNS** — если unbound/stubby не поднялся, явный fallback вместо битого форварда
+- **Валидация всех входных данных** — имена клиентов, порты, пути, IP-адреса
+- **`safe_sed()`** — все замены в конфигах через экранирующую обёртку, инъекции невозможны
+- **Именованные функции** вместо `bash -c` в системных тестах — нет интерполяции строки команды
+- **Атомарные операции** — конфиги перезаписываются через `mktemp` + `mv`, никаких частичных записей
+- **ERR-trap** — все ненулевые коды возврата логируются с контекстом
+- **Бэкап перед опасными операциями** — предлагается автоматически
 
 ---
 
@@ -372,68 +383,37 @@ sudo wg-quick up ./mydevice.conf
 ├── wg1.conf, wg2.conf...       # Туннели
 ├── .wg-setup.conf              # Конфигурация скрипта
 ├── .traffic-limits             # Лимиты трафика по клиентам
-├── .tunnel-force-domains       # Домены/CIDR принудительно в туннель
-├── .tunnel-force-cidr          # CIDR принудительно в туннель
-├── .direct-ips                 # Подсети напрямую (whitelist)
 ├── clients/
 │   ├── phone.conf
 │   └── laptop.conf
 └── geoip/
-    ├── ru-aggregated.zone      # Offline IPv4 база (приоритет над сетевыми источниками)
+    ├── ru-aggregated.zone      # Offline IPv4 база
     └── ru-aggregated-v6.zone   # Offline IPv6 база
 
 /usr/local/bin/
 ├── wg-balance.sh               # Балансировщик туннелей
 ├── update-ru-ipset.sh          # Обновление GeoIP
 ├── wg-traffic-limit.sh         # Watchdog лимитов трафика
-├── wg-ip-watchdog.sh           # Мониторинг смены публичного IP
-└── telemt                      # Бинарь MTProxy (Rust)
+└── telemt                      # Бинарь MTProxy
 
+/etc/unbound/unbound.conf       # Конфиг рекурсивного резолвера (в -unbound версиях)
 /etc/telemt.toml                # Конфиг Telemt MTProxy
 /etc/stubby/stubby.yml          # Конфиг DNS-over-TLS резолвера
-/etc/unbound/unbound.conf.d/    # Конфиг рекурсивного резолвера
-/var/lib/unbound/root.hints     # Root hints для рекурсивного резолвинга
 /var/lib/wg/limits/             # State-файлы счётчиков трафика
-/var/backups/wg-home/           # Бэкапы (последние 10, старые удаляются)
-/var/log/wg-server-trap.log     # Лог ошибок ERR-trap
+/var/backups/wg-home/           # Бэкапы конфигурации
+/var/log/wg-server-trap.log     # Лог ошибок скрипта
 ```
-
----
-
-## 🗂️ Автономные GeoIP-файлы
-
-Репозиторий содержит актуальные списки РФ-подсетей:
-
-- [`geoip/ru-aggregated.zone`](https://github.com/avar-soft/wireguard-home-server/blob/main/geoip/ru-aggregated.zone) — IPv4 (8500+ подсетей)
-- [`geoip/ru-aggregated-v6.zone`](https://github.com/avar-soft/wireguard-home-server/blob/main/geoip/ru-aggregated-v6.zone) — IPv6
-
-Если файлы уже есть в `/etc/wireguard/geoip/` — скрипт использует **только их**, не скачивая ничего из сети. Это позволяет работать полностью **offline** или в закрытых сетях.
-
-При обновлении `update-ru-ipset.sh` опрашивает источники в порядке приоритета:
-
-1. Локальный файл `/etc/wireguard/geoip/ru-aggregated.zone` (если есть)
-2. Этот репозиторий (`avar-soft/wireguard-home-server/geoip/`)
-3. ipdeny.com, herrbischoff/country-ip-blocks, ipverse — резервные
 
 ---
 
 ## ⚙️ Переменные окружения
 
 ```bash
-# Расширенное логирование ошибок в stderr
-export WG_DEBUG="1"
-
-# Путь к файлу лога ERR-trap (только /var/log/, /tmp/, /run/)
-export WG_ERR_LOG="/var/log/wg-server-trap.log"
-
-# Редактор для ручного редактирования конфигов
-export EDITOR="nano"   # nano | vim | vi
-
-# Репозиторий Telemt (если нужен форк)
-export TELEMT_REPO="telemt/telemt"
-
-# URL для авто-обновления скрипта
-export WG_VERSION_URL="https://example.com/wg/version.txt"
+export WG_VERSION_URL="https://example.com/wg/version.txt"  # URL для авто-проверки версии
+export EDITOR="nano"         # nano | vim | vi
+export WG_DEBUG="1"          # Расширенный вывод ошибок в stderr
+export WG_ERR_LOG="/var/log/wg-server-trap.log"  # Путь к лог-файлу ERR-trap
+export TELEMT_REPO="telemt/telemt"  # Репозиторий Telemt (если нужен форк)
 ```
 
 ---
@@ -444,7 +424,7 @@ export WG_VERSION_URL="https://example.com/wg/version.txt"
 Главное меню → 20) Обновить скрипт
 ```
 
-Обновление происходит **атомарно** через `install` + `mv` — текущий запущенный процесс не прерывается. Все конфиги сохраняются.
+Или вручную — просто запусти новую версию скрипта. Все конфиги сохраняются. Обновление происходит **атомарно** через `install` + `mv` — текущий запущенный процесс не прерывается.
 
 ---
 
@@ -460,48 +440,32 @@ export WG_VERSION_URL="https://example.com/wg/version.txt"
 sudo bash wg-server.sh --remove
 ```
 
-Удаляет: WireGuard интерфейсы, nftables правила, systemd-сервисы, конфиги. Пакеты не трогаются.
+Удаляет: WireGuard интерфейсы, nftables правила, systemd-сервисы, конфиги. Пакеты (`wireguard`, `dnsmasq` и др.) не трогаются.
 
 ---
 
 ## 📝 Журнал изменений
 
-### v28.25.1 — `wg-server-unbound.sh` (текущая)
+**v28.24.22 — текущая версия**
 
-**Новое:**
-- 🔁 **Unbound** как первичный DNS в geo-режиме — рекурсивный резолвер (root servers, DNSSEC, qname-min, кэш 512MB) вместо форварда на Яндекс. Fallback на Яндекс.DNS при недоступности unbound
-- 📡 **Автономные GeoIP-источники** — этот репозиторий (`avar-soft/wireguard-home-server/geoip/`) теперь первичный источник IPv4 и IPv6 баз; ipdeny.com и другие — резервные
-- 🔢 **Byte-length-limited chunking** — `_rebuildTunnelForce` ограничивает длину каждой строки `add element ... {}` до 4096 байт при любом объёме CIDR, включая 20 000+ подсетей IPv6
+- 🔧 `wg-server-unbound.sh` и `wg-server-unbound-testmenu.sh`: Unbound как рекурсивный резолвер вместо внешних апстримов
+- 🔧 Исправлен fallback локали: `C.UTF-8` → `C` на минимальных системах (Alpine и др.)
+- 🛡️ `_WG_INTERACTIVE` flag — ERR-trap не логирует EOF/таймаут от `read` в меню
+- 🔧 `set -E` перед `trap ERR` — корректное наследование trap в функциях и подоболочках
+- ✅ `wg-server-unbound-testmenu.sh`: расширенное меню диагностики (18 секций, пошаговый тест)
 
-**Исправления надёжности:**
-- 🐛 **`TUNNEL_TABLE[$idx]`** — критическая ошибка индексации массива (`idx` → `$idx`); таблицы маршрутизации теперь корректно сохраняются и восстанавливаются
-- ⚛️ **Атомарная запись `/etc/nftables.conf`** — все `cat >>` пишут во временный файл → `nft -c` dry-run → `mv -f`; прерванная запись не сломает nftables при перезагрузке
-- 🔒 **`repairRouting` под flock** — устранена гонка между ручным ремонтом и балансировщиком
-- 🔁 **Дубли `ip rule`** — `while grep -q` вместо одиночного `del` удаляет все накопившиеся дубли
-- 🛡️ **`safe_sed` LHS** — экранируются все regex-метасимволы (`. * [ ] ^ $ { } + ?`), не только `|`
-- 🔐 **`_telemt_downloadBinary`** — подоболочка для `trap EXIT`, не затрагивает родителя
-- 🔐 **`openssl` check** — проверка перед генерацией секретов, автоустановка
-- 🌐 **DNS fallback** — если unbound/stubby не поднялся, явный fallback вместо битого форварда на несуществующий порт
-- 🔊 **`_quickBackupPrompt`** — убран `2>/dev/null`, ошибки tar/disk видны пользователю
-- 🔧 **`xxd` вместо `od`** — для domain_hex в Telemt (xxd — явная зависимость, поведение od отличается)
-- 🔧 **awk-парсинг TOML** — `showTelemetLinks` корректно читает `public_host`/`tls_domain` (игнорирует комментарии, дубли секций)
-- 🧹 **`restoreConfig`** — убран дублирующий `rm -rf tmpdir`, cleanup только через `trap RETURN`
-- ⚙️ **`applyJitter`** — `modprobe sch_netem` + fallback без `distribution normal` на образах без этого модуля
-- 🌐 **`rp_filter=2`** — применяется ко всем интерфейсам через `/proc/sys/net/ipv4/conf/*/rp_filter`, не только `all` и `default`
-
-### v28.24.21 — `wg-server.sh`
+**v28.24.21**
 
 - 🐛 Очистка state-файлов лимитов трафика при снятии/изменении лимита
 - 🛡️ `_statusBar()` защищена от `set -u` при вызове вне `menu()`
 - 🔧 `restoreBackup`: `trap RETURN` вместо ручного удаления tmpdir
-- 🔧 `geo4`/`geo6` pipelines: добавлен `|| true` против `pipefail`
 
-### v28.24.20
+**v28.24.20**
 
 - 🔧 Смена порта Telemt: `sed` → `safe_sed`
 - 🔧 `installTelemt`: проверка занятости альтернативного порта
 
-### v28.24.19
+**v28.24.19**
 
 - 🛡️ `runSystemTest`: убран `bash -c`, именованные `_chk_*` функции
 - 🛡️ `menuTelemetConfig`: `sed` → `safe_sed` для `tls_domain`
@@ -510,14 +474,13 @@ sudo bash wg-server.sh --remove
 
 ## 🤝 Участие в разработке
 
-Pull requests приветствуются. Для значительных изменений — открой Issue.
+Pull requests приветствуются. Для значительных изменений — открой Issue для обсуждения.
 
-**Правила кода:**
-
+**Правила:**
 - Весь bash через `set -uo pipefail`
 - Пользовательский ввод — только через `safe_sed()` и валидацию
-- Временные файлы — через `mktemp` с `trap` на очистку, атомарный `mv -f`
-- Нетривиальные решения обязательно комментировать с номером fix
+- Временные файлы — через `mktemp` с `trap` на очистку
+- Комментарии к нетривиальным решениям обязательны
 
 ---
 
@@ -534,4 +497,5 @@ MIT © [avar-soft](https://github.com/avar-soft)
 ⭐ Если проект полезен — поставь звезду!
 
 </div>
+
 
